@@ -1,0 +1,23 @@
+<?php
+session_start();
+$_SESSION['login']=$_GET["login"];
+$_SESSION['pwd']=$_GET["pwd"];
+if(isset($_SESSION['login']) and isset($_SESSION['pwd']) and !empty($_SESSION['login']) and !empty($_SESSION['pwd']))
+{
+echo"Connection de ".$_SESSION['login']." OK.";
+?>
+<form : method=get action="index_action2.php" />
+Mail : <input type="text" name="mail" />
+<br />
+<input type="submit" value="connection" />
+<input type="reset" value="remise &agrave; z&eacute;ro" />
+</form>
+
+
+<?php
+}
+else{
+echo"Connection impossible !!!!!!!!!!!!!!!!";
+}
+?>
+

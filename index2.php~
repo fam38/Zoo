@@ -1,0 +1,10 @@
+<b>hello world</b>
+<form : method=get action="index_action.php" />
+login : <input type="text" name="login" />
+password : <input type="password" name="pwd" />
+<input type="hidden" name="Methode" value="index1" />
+
+<br />
+<input type="submit" value="connection" />
+<input type="reset" value="remise &agrave; z&eacute;ro" />
+</form>

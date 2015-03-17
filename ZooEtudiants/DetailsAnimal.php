@@ -1,0 +1,52 @@
+<?php
+$titre = 'Détails d’un animal';
+include('entete.php');
+
+	  $requete = " select nomA from LesAnimaux order by nomA";
+	  $curseur = oci_parse ($lien, $requete) ;
+	  oci_execute ($curseur) ;
+	  $res = oci_fetch($curseur);
+
+	  if ($res) {
+	    echo "<form method=\"post\" action=\"DetailsAnimal-action.php\">";
+	    //liste des pays
+	    echo "Choisir un animal (un seul): <p><select size=\"3\" name=\"nomA\"> ";
+	    do {
+		$unAnimal = oci_result ($curseur,1);
+		echo "<option value=\"$unAnimal\">$unAnimal</option> ";
+	    } while (oci_fetch ($curseur)); 
+	    oci_free_statement ($curseur);
+	    echo "</select> </p>";
+	    echo "<p> <input type=\"submit\" value=\"OK\"/> 
+	              <input type=\"reset\" value=\"Remise à zéro\"/> </p>";
+	    echo "</form>";
+	  }
+	  else {
+	    echo LeMessage ("animalinconnu") ;
+	  }
+
+//recherche par pays
+	  $requete = " select distinct pays from zoo.LesAnimaux order by pays";
+	  $curseur = oci_parse ($lien, $requete) ;
+	  oci_execute ($curseur) ;
+	  $res = oci_fetch($curseur);
+
+	  if ($res) {
+	    echo "<form method=\"post\" action=\"DetailsAnimal-action.php\">";
+	    //liste des pays
+	    echo "Choisir un pays (un seul): <p><select size=\"3\" name=\"pays\"> ";
+	    do {
+		$unPays = oci_result ($curseur,1);
+		echo "<option value=\"$unPays\">$unPays</option> ";
+	    } while (oci_fetch ($curseur)); 
+	    oci_free_statement ($curseur);
+	    echo "</select> </p>";
+	    echo "<p> <input type=\"submit\" value=\"OK\"/> 
+	              <input type=\"reset\" value=\"Remise à zéro\"/> </p>";
+	    echo "</form>";
+	  }
+	  else {
+	    echo LeMessage ("paysinconnu") ;
+	  }
+include('pied.php');
+?>

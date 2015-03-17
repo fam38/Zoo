@@ -1,0 +1,14 @@
+<?php
+session_start();
+$mail=$_GET["mail"];
+if(isset($mail) and !empty($mail))
+{
+echo"Connection de ".$_SESSION['login']." OK.<br />";
+
+echo"Mail : $mail";
+echo"méthode utilisé : ".$_SESSION['Methode'];
+}
+else{
+echo"Entrez un mail !!!!!!!!!!!!!!!!";
+}
+?>

@@ -1,0 +1,142 @@
+<?php
+$titre = 'Déménagement d\'animaux';
+include('entete.php');
+//print_r($_POST);
+if( (isset($_POST['noCage']) && !empty($_POST['noCage'])) && (isset($_POST['noCage2']) && !empty($_POST['noCage2'])))
+{
+  $noCage = $_POST['noCage'];
+  $noCage2 = $_POST['noCage2'];
+
+  if ($noCage == $noCage2)
+  {
+  echo "Demenager les animaux dans la meme cage n'est pas tres utile ...";
+
+  }
+  else
+{
+
+  $requete = " select distinct C1.noCage" 
+	  ." from LesCages C1 join LesCages C2 on (C1.noCage <> C2.noCage and C1.noAllee = C2.noAllee) join lesAnimaux A2 on (C2.nocage = A2.nocage)"
+	  ." where C1.noCage = :n";
+  $curseur = oci_parse ($lien, $requete) ;
+	  //liaison entre la var PHP et le parametre SQL
+	  oci_bind_by_name ($curseur, ":n", $noCage) ;
+	  oci_execute ($curseur) ;
+	  $res = oci_fetch ($curseur) ;
+
+  $requete2 = " select noCage from LesCages C join lesresponsables R on ( C.noallee = R.noallee) where nocage = :n";
+  $curseur2 = oci_parse ($lien, $requete2) ;
+	  //liaison entre la var PHP et le parametre SQL
+	  oci_bind_by_name ($curseur2, ":n", $noCage2) ;
+	  oci_execute ($curseur2) ;
+	  $res2 = oci_fetch ($curseur2) ;
+
+    if ($res && $res2) 
+    {
+     
+    
+      $requete = " update lesAnimaux set noCage = :c where noCage = :n";
+
+      $curseur = oci_parse ($lien, $requete) ;
+      oci_bind_by_name ($curseur, ":n", $noCage) ;
+      oci_bind_by_name ($curseur, ":c", $noCage2) ;
+       
+      // execution de la requete
+      $res = @oci_execute ($curseur,OCI_NO_AUTO_COMMIT) ;
+
+      if ($res) {
+     
+      $requete = " update lesGardiens set noCage = :c where noCage = :n and nomE not in( select nomE from lesGardiens where noCage = :c)";
+      $curseur = oci_parse ($lien, $requete) ;
+      oci_bind_by_name ($curseur, ":n", $noCage) ;
+      oci_bind_by_name ($curseur, ":c", $noCage2) ;
+  
+      $res = @oci_execute ($curseur,OCI_NO_AUTO_COMMIT) ;
+
+      $requete = "delete from lesGardiens where noCage = :n";
+      $curseur = oci_parse ($lien, $requete) ;
+      oci_bind_by_name ($curseur, ":n", $noCage) ;
+      // execution de la requete
+      $res2 = @oci_execute ($curseur,OCI_NO_AUTO_COMMIT) ;
+
+      if ($res && $res2)
+      {
+	  echo LeMessage ("majOK") ;
+      // terminaison de la transaction : validation
+      oci_commit ($lien) ;
+      }
+      else
+      {
+	echo"???";
+	echo LeMessage ("majRejetee") ;
+	// terminaison de la transaction : annulation
+	oci_rollback ($lien) ;
+      }
+
+      }
+       else {
+    echo "?";
+    echo LeMessage ("majRejetee") ;
+    // terminaison de la transaction : annulation
+    oci_rollback ($lien) ;
+
+      }
+
+
+    }
+    else if ($res)
+    {
+      echo"La nouvelle cage n'a pas de responsable. Transaction Impossible";
+    }
+    else
+    {
+      echo"La cage à demenager est la derniere de son allee. Transaction Impossible";
+      
+    }
+  }
+}
+else
+{
+$requete = " select distinct noCage" 
+	  ." from LesCages order by nocage";
+$requete2 = " select noCage from LesCages order by nocage";    
+	  $curseur = oci_parse ($lien, $requete) ;
+	  oci_execute ($curseur) ;
+	  $res = oci_fetch($curseur);
+	  $curseur2 = oci_parse ($lien, $requete2) ;
+	  oci_execute ($curseur2) ;
+	  $res2 = oci_fetch($curseur2);
+
+	  if ($res && $res2) 
+	    {
+	    echo "<form method=\"post\" action=\"#\">";
+	    //liste des pays
+	    echo "Choisir une cage a demenager (une seul): <p><select size=\"3\" name=\"noCage\"> ";
+	    
+	    do {
+		$uneCage = oci_result ($curseur,1);
+		echo "<option value=\"$uneCage\">$uneCage</option> ";
+		} while (oci_fetch ($curseur)); 
+	    oci_free_statement ($curseur);
+	    
+	  echo "</select> </p>";
+	  echo "Choisir une cage a enmenager(une seul): <p><select size=\"3\" name=\"noCage2\"> ";
+	    do {
+		$uneCage2 = oci_result ($curseur2,1);
+		echo "<option value=\"$uneCage2\">$uneCage2</option> ";
+		} while (oci_fetch ($curseur2)); 
+	    oci_free_statement ($curseur2);
+	    
+	  echo "</select> </p>";
+	  echo "<p> <input type=\"submit\" value=\"OK\"/> 
+	              </p>";
+	  echo "</form>";
+
+	}
+	else 
+	{
+	  echo" Aucun déménagement possible";
+	}
+}
+include('pied.php');
+?>
